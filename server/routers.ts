@@ -43,7 +43,7 @@ export const appRouter = router({
           
           // Use image generation API to remove background
           const { url: processedUrl } = await generateImage({
-            prompt: "Remove background, keep subject, transparent PNG",
+            prompt: "Remove background completely, keep only the main subject with clean edges",
             originalImages: [{
               b64Json: base64Content,
               mimeType: input.mimeType,
@@ -54,7 +54,34 @@ export const appRouter = router({
             throw new Error("Failed to generate processed image");
           }
           
-          return { processedUrl, status: "completed" };
+          // Download the transparent image and composite it on white background
+          const response = await fetch(processedUrl);
+          const arrayBuffer = await response.arrayBuffer();
+          const buffer = Buffer.from(arrayBuffer);
+          
+          // Use sharp to composite transparent image on white background
+          const sharp = (await import('sharp')).default;
+          const image = sharp(buffer);
+          const metadata = await image.metadata();
+          
+          // Create white background and composite the transparent image on top
+          const withWhiteBg = await sharp({
+            create: {
+              width: metadata.width || 1024,
+              height: metadata.height || 1024,
+              channels: 4,
+              background: { r: 255, g: 255, b: 255, alpha: 1 }
+            }
+          })
+          .composite([{ input: buffer }])
+          .png()
+          .toBuffer();
+          
+          // Upload the final image with white background to S3
+          const finalKey = `public/processed/${nanoid()}.png`;
+          const { url: finalUrl } = await storagePut(finalKey, withWhiteBg, "image/png");
+          
+          return { processedUrl: finalUrl, status: "completed" };
         } catch (error) {
           console.error("Background removal error:", error);
           throw new Error("Failed to remove background");

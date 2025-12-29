@@ -41,3 +41,8 @@
 - [x] Change default background to white instead of transparent
 - [x] Optimize processing speed
 - [x] Allow users to toggle between transparent and white background
+
+## Performance & Output Fixes
+- [x] Speed up background removal processing
+- [x] Automatically apply white background to processed image (not just UI display)
+- [x] Ensure downloaded image has white background by default
