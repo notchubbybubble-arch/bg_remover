@@ -33,3 +33,6 @@
 - [x] Remove database storage for anonymous users
 - [x] Update frontend to remove login flow
 - [x] Remove user-specific features and database queries
+
+## Bug Fixes
+- [x] Fix background removal not working - investigate and resolve the issue

@@ -26,16 +26,26 @@ export const appRouter = router({
     // Remove background directly without storing in database
     removeBackground: publicProcedure
       .input(z.object({
-        imageUrl: z.string(),
+        base64Data: z.string(),
         mimeType: z.string(),
       }))
       .mutation(async ({ input }) => {
         try {
+          // Extract base64 data from data URL if present
+          let base64Content = input.base64Data;
+          if (base64Content.startsWith('data:')) {
+            // Remove the data URL prefix (e.g., "data:image/png;base64,")
+            const base64Index = base64Content.indexOf('base64,');
+            if (base64Index !== -1) {
+              base64Content = base64Content.substring(base64Index + 7);
+            }
+          }
+          
           // Use image generation API to remove background
           const { url: processedUrl } = await generateImage({
             prompt: "Remove the background from this image, keep the subject intact with clean edges, output transparent PNG",
             originalImages: [{
-              url: input.imageUrl,
+              b64Json: base64Content,
               mimeType: input.mimeType,
             }],
           });

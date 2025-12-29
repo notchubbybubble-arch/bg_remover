@@ -65,7 +65,7 @@ export default function Home() {
     try {
       // Use the data URL directly for processing
       const result = await removeBgMutation.mutateAsync({
-        imageUrl: previewUrl,
+        base64Data: previewUrl,
         mimeType: selectedFile.type,
       });
 

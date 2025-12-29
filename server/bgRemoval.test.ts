@@ -36,7 +36,7 @@ describe("bgRemoval.removeBackground", () => {
     // Test that invalid input is rejected
     await expect(
       caller.bgRemoval.removeBackground({
-        imageUrl: "",
+        base64Data: "",
         mimeType: "",
       } as any)
     ).rejects.toThrow();
