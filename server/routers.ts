@@ -43,7 +43,7 @@ export const appRouter = router({
           
           // Use image generation API to remove background
           const { url: processedUrl } = await generateImage({
-            prompt: "Remove the background from this image, keep the subject intact with clean edges, output transparent PNG",
+            prompt: "Remove background, keep subject, transparent PNG",
             originalImages: [{
               b64Json: base64Content,
               mimeType: input.mimeType,

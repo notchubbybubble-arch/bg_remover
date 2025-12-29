@@ -11,7 +11,7 @@ export default function Home() {
   const [processedUrl, setProcessedUrl] = useState<string>("");
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [backgroundColor, setBackgroundColor] = useState<string>("");
+  const [backgroundColor, setBackgroundColor] = useState<string>("#FFFFFF");
   const [sliderPosition, setSliderPosition] = useState(50);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -49,7 +49,7 @@ export default function Home() {
   const processFile = (file: File) => {
     setSelectedFile(file);
     setProcessedUrl("");
-    setBackgroundColor("");
+    setBackgroundColor("#FFFFFF");
     
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -208,7 +208,7 @@ export default function Home() {
                     <div
                       className="relative aspect-square rounded-lg overflow-hidden"
                       style={{
-                        backgroundColor: backgroundColor || "transparent",
+                        backgroundColor: backgroundColor,
                       }}
                     >
                       {!processedUrl ? (
@@ -229,7 +229,7 @@ export default function Home() {
                           </div>
                         </div>
                       ) : (
-                        <div className={backgroundColor ? "" : "checkerboard w-full h-full"}>
+                        <div className="w-full h-full">
                           <img
                             src={processedUrl}
                             alt="Processed"
@@ -316,15 +316,20 @@ export default function Home() {
                             onChange={(e) => setBackgroundColor(e.target.value)}
                             className="w-12 h-10 rounded border border-border cursor-pointer"
                           />
-                          {backgroundColor && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setBackgroundColor("")}
-                            >
-                              Clear
-                            </Button>
-                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setBackgroundColor("#FFFFFF")}
+                          >
+                            White
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setBackgroundColor("transparent")}
+                          >
+                            Transparent
+                          </Button>
                         </div>
 
                         <Button onClick={handleDownload} size="lg" variant="default">

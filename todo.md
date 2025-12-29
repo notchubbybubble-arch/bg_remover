@@ -36,3 +36,8 @@
 
 ## Bug Fixes
 - [x] Fix background removal not working - investigate and resolve the issue
+
+## New Features
+- [x] Change default background to white instead of transparent
+- [x] Optimize processing speed
+- [x] Allow users to toggle between transparent and white background
