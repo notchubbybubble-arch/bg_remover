@@ -43,15 +43,15 @@
 }
 
 :root {
-  --primary: var(--color-blue-700);
-  --primary-foreground: var(--color-blue-50);
-  --sidebar-primary: var(--color-blue-600);
-  --sidebar-primary-foreground: var(--color-blue-50);
-  --chart-1: var(--color-blue-300);
-  --chart-2: var(--color-blue-500);
-  --chart-3: var(--color-blue-600);
-  --chart-4: var(--color-blue-700);
-  --chart-5: var(--color-blue-800);
+  --primary: oklch(55% 0.18 285);
+  --primary-foreground: oklch(100% 0 0);
+  --sidebar-primary: oklch(55% 0.18 285);
+  --sidebar-primary-foreground: oklch(100% 0 0);
+  --chart-1: oklch(60% 0.18 285);
+  --chart-2: oklch(65% 0.15 200);
+  --chart-3: oklch(70% 0.12 150);
+  --chart-4: oklch(75% 0.10 100);
+  --chart-5: oklch(80% 0.08 50);
   --radius: 0.65rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.235 0.015 65);
@@ -173,5 +173,18 @@
       padding-right: 2rem;
       max-width: 1280px; /* Standard content width */
     }
+  }
+}
+
+@layer utilities {
+  /* Checkerboard pattern for transparent backgrounds */
+  .checkerboard {
+    background-image: 
+      linear-gradient(45deg, oklch(92% 0 0) 25%, transparent 25%),
+      linear-gradient(-45deg, oklch(92% 0 0) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, oklch(92% 0 0) 75%),
+      linear-gradient(-45deg, transparent 75%, oklch(92% 0 0) 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
   }
 }
