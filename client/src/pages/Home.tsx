@@ -136,7 +136,7 @@ export default function Home() {
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
               <ImageIcon className="w-6 h-6 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold">BG Remover</h1>
+            <h1 className="text-2xl font-bold">bettercallghaith</h1>
           </div>
           <p className="text-sm text-muted-foreground hidden sm:block">
             Free AI-powered background removal

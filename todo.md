@@ -46,3 +46,10 @@
 - [x] Speed up background removal processing
 - [x] Automatically apply white background to processed image (not just UI display)
 - [x] Ensure downloaded image has white background by default
+
+## Deployment & Branding
+- [x] Change website title to "bettercallghaith"
+- [x] Configure project for Vercel deployment
+- [x] Add vercel.json configuration file
+- [x] Create Vercel serverless function for background removal
+- [x] Add deployment documentation
