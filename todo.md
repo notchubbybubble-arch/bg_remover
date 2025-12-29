@@ -26,3 +26,10 @@
 - [x] Before/after slider component
 - [x] Download functionality
 - [x] Error handling and user feedback
+
+## New Changes
+- [x] Remove authentication requirement - allow public access
+- [x] Update backend procedures to use publicProcedure instead of protectedProcedure
+- [x] Remove database storage for anonymous users
+- [x] Update frontend to remove login flow
+- [x] Remove user-specific features and database queries

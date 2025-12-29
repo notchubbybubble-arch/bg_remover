@@ -1,14 +1,11 @@
-import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { Download, Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export default function Home() {
-  const { user, loading: authLoading, isAuthenticated } = useAuth();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [processedUrl, setProcessedUrl] = useState<string>("");
@@ -18,7 +15,6 @@ export default function Home() {
   const [sliderPosition, setSliderPosition] = useState(50);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const uploadMutation = trpc.bgRemoval.uploadImage.useMutation();
   const removeBgMutation = trpc.bgRemoval.removeBackground.useMutation();
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -63,32 +59,18 @@ export default function Home() {
   };
 
   const handleRemoveBackground = async () => {
-    if (!selectedFile || !isAuthenticated) return;
+    if (!selectedFile || !previewUrl) return;
 
     setIsProcessing(true);
     try {
-      // Convert file to base64
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const base64Data = (e.target?.result as string).split(",")[1];
+      // Use the data URL directly for processing
+      const result = await removeBgMutation.mutateAsync({
+        imageUrl: previewUrl,
+        mimeType: selectedFile.type,
+      });
 
-        // Upload image
-        const uploadResult = await uploadMutation.mutateAsync({
-          fileName: selectedFile.name,
-          fileType: selectedFile.type,
-          fileSize: selectedFile.size,
-          base64Data,
-        });
-
-        // Remove background
-        const result = await removeBgMutation.mutateAsync({
-          imageId: uploadResult.imageId,
-        });
-
-        setProcessedUrl(result.processedUrl);
-        toast.success("Background removed successfully!");
-      };
-      reader.readAsDataURL(selectedFile);
+      setProcessedUrl(result.processedUrl);
+      toast.success("Background removed successfully!");
     } catch (error) {
       toast.error("Failed to remove background. Please try again.");
       console.error(error);
@@ -145,37 +127,6 @@ export default function Home() {
     }
   };
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background px-4">
-        <div className="text-center max-w-2xl">
-          <div className="mb-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-primary/10 mb-6">
-              <ImageIcon className="w-10 h-10 text-primary" />
-            </div>
-            <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              BG Remover
-            </h1>
-            <p className="text-xl text-muted-foreground mb-8">
-              Remove backgrounds from your images with AI-powered precision. Get HD quality results in seconds.
-            </p>
-          </div>
-          <Button size="lg" onClick={() => window.location.href = getLoginUrl()} className="text-lg px-8 py-6">
-            Sign In to Get Started
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -187,9 +138,9 @@ export default function Home() {
             </div>
             <h1 className="text-2xl font-bold">BG Remover</h1>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">Welcome, {user?.name}</span>
-          </div>
+          <p className="text-sm text-muted-foreground hidden sm:block">
+            Free AI-powered background removal
+          </p>
         </div>
       </header>
 
@@ -212,7 +163,7 @@ export default function Home() {
                 </div>
                 <h2 className="text-3xl font-bold mb-3">Upload Your Image</h2>
                 <p className="text-muted-foreground mb-8 max-w-md">
-                  Drag and drop your image here, or click the button below to select a file
+                  Drag and drop your image here, or click the button below to select a file. No sign-up required!
                 </p>
                 <input
                   ref={fileInputRef}
@@ -336,7 +287,7 @@ export default function Home() {
               {/* Controls */}
               <Card className="p-6">
                 <div className="flex flex-wrap gap-4 items-center justify-between">
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-wrap items-center gap-4">
                     <Button
                       onClick={handleRemoveBackground}
                       disabled={isProcessing || !!processedUrl}
@@ -394,6 +345,13 @@ export default function Home() {
           )}
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="border-t border-border mt-12 py-6">
+        <div className="container text-center text-sm text-muted-foreground">
+          <p>Free background removal tool powered by AI. No registration required.</p>
+        </div>
+      </footer>
     </div>
   );
 }

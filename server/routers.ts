@@ -23,98 +23,32 @@ export const appRouter = router({
   }),
 
   bgRemoval: router({
-    // Upload original image to S3
-    uploadImage: protectedProcedure
+    // Remove background directly without storing in database
+    removeBackground: publicProcedure
       .input(z.object({
-        fileName: z.string(),
-        fileType: z.string(),
-        fileSize: z.number(),
-        base64Data: z.string(),
+        imageUrl: z.string(),
+        mimeType: z.string(),
       }))
-      .mutation(async ({ ctx, input }) => {
-        const userId = ctx.user.id;
-        const buffer = Buffer.from(input.base64Data, "base64");
-        
-        // Upload to S3 with random suffix to prevent enumeration
-        const fileKey = `${userId}/originals/${nanoid()}-${input.fileName}`;
-        const { url } = await storagePut(fileKey, buffer, input.fileType);
-        
-        // Create database record
-        const imageId = await createImage({
-          userId,
-          originalUrl: url,
-          originalKey: fileKey,
-          status: "processing",
-          fileSize: input.fileSize,
-          mimeType: input.fileType,
-        });
-        
-        return { imageId, originalUrl: url };
-      }),
-    
-    // Remove background using image generation API
-    removeBackground: protectedProcedure
-      .input(z.object({
-        imageId: z.number(),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        const userId = ctx.user.id;
-        const image = await getImageById(input.imageId);
-        
-        if (!image || image.userId !== userId) {
-          throw new Error("Image not found or unauthorized");
-        }
-        
+      .mutation(async ({ input }) => {
         try {
           // Use image generation API to remove background
           const { url: processedUrl } = await generateImage({
             prompt: "Remove the background from this image, keep the subject intact with clean edges, output transparent PNG",
             originalImages: [{
-              url: image.originalUrl,
-              mimeType: image.mimeType || "image/png",
+              url: input.imageUrl,
+              mimeType: input.mimeType,
             }],
           });
           
-          // Download the processed image and upload to our S3
           if (!processedUrl) {
             throw new Error("Failed to generate processed image");
           }
-          const response = await fetch(processedUrl);
-          const arrayBuffer = await response.arrayBuffer();
-          const buffer = Buffer.from(arrayBuffer);
           
-          // Upload processed image to S3
-          const processedKey = `${userId}/processed/${nanoid()}-processed.png`;
-          const { url: finalUrl } = await storagePut(processedKey, buffer, "image/png");
-          
-          // Update database record
-          await updateImage(input.imageId, {
-            processedUrl: finalUrl,
-            processedKey,
-            status: "completed",
-          });
-          
-          return { processedUrl: finalUrl, status: "completed" };
+          return { processedUrl, status: "completed" };
         } catch (error) {
-          await updateImage(input.imageId, { status: "failed" });
-          throw error;
+          console.error("Background removal error:", error);
+          throw new Error("Failed to remove background");
         }
-      }),
-    
-    // Get user's images
-    listImages: protectedProcedure.query(async ({ ctx }) => {
-      return getUserImages(ctx.user.id);
-    }),
-    
-    // Get single image
-    getImage: protectedProcedure
-      .input(z.object({ imageId: z.number() }))
-      .query(async ({ ctx, input }) => {
-        const image = await getImageById(input.imageId);
-        if (!image || image.userId !== ctx.user.id) {
-          throw new Error("Image not found or unauthorized");
-        }
-        return image;
       }),
   }),
 });
